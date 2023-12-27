@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import CoreData
 
 class DetailsVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
 
@@ -14,10 +15,22 @@ class DetailsVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var txtName: UITextField!
     @IBOutlet weak var txtArtist: UITextField!
     @IBOutlet weak var txtYear: UITextField!
+    
+    var chosenPainting = ""
+    var chosenPaintingID : UUID?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        
+        if chosenPainting != ""{
+            //Core Data
+            
+            
+            
+            
+        } else {
+            //Boş ekran gelecek
+        }
         
         // Recognizer
         
@@ -49,7 +62,35 @@ class DetailsVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     @IBAction func btnSaveClicked(_ sender: Any) {
+        
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        let context = appDelegate.persistentContainer.viewContext
+        
+        let newPainting = NSEntityDescription.insertNewObject(forEntityName: "Paintings", into: context)
+        
+        // Attributes
+        
+        newPainting.setValue(txtName.text!, forKey: "name")
+        newPainting.setValue(txtArtist.text!, forKey: "artist")
+        if let year = Int(txtYear.text!) {
+            newPainting.setValue(year, forKey: "year")
+        }
+        newPainting.setValue(UUID(), forKey: "id")
+        
+        let data = imageView.image!.jpegData(compressionQuality: 0.4)
+        newPainting.setValue(data, forKey: "image")
+        
+        do {
+            try context.save()
+            print("saved")
+        } catch {
+            print("hata")
+        }
+        NotificationCenter.default.post(name: NSNotification.Name("newData"), object: nil)
+        self.navigationController?.popViewController(animated: true)
     }
+    
+    
     
 
 }
