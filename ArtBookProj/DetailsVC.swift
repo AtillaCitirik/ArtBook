@@ -24,10 +24,40 @@ class DetailsVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
 
         if chosenPainting != ""{
             //Core Data
+        
+            let appdelegate = UIApplication.shared.delegate as! AppDelegate
+            let context = appdelegate.persistentContainer.viewContext
             
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Paintings")
+            let idString = chosenPaintingID?.uuidString
+            fetchRequest.predicate = NSPredicate(format: "id = %@", idString!)
+            fetchRequest.returnsObjectsAsFaults = false
             
-            
-            
+            do {
+                let results = try context.fetch(fetchRequest)
+                
+                if results.count > 0 {
+                    for result in results as! [NSManagedObject] {
+                        
+                        if let name = result.value(forKey: "name") as? String {
+                            txtName.text = name
+                        }
+                        
+                        if let artist = result.value(forKey: "artist") as? String {
+                            txtArtist.text = artist
+                        }
+                        if let year = result.value(forKey: "year") as? Int{
+                            txtYear.text = String(year)
+                        }
+                        if let imageData = result.value(forKey: "image") as? Data {
+                            let image = UIImage(data: imageData)
+                            imageView.image = image
+                        }
+                    }
+                }
+            } catch {
+                print("error")
+            }
         } else {
             //Boş ekran gelecek
         }
